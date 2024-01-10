@@ -1,0 +1,35 @@
+#Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backendmutosi
+spec:
+  replicas: 15
+  selector:
+    matchLabels:
+      app: backendmutosi
+  template:
+    metadata:
+      labels:
+        app: backendmutosi
+    spec:
+      volumes:
+        - name: pv-be-nfs
+          persistentVolumeClaim:
+            claimName: pvc-be-nfs
+      containers:
+        - name: backendmutosi
+          image: registry.mutosi.com/backend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - mountPath: /var/www/html
+              name: pv-be-nfs
+          resources:
+            requests:
+              cpu: 250m
+      imagePullSecrets:
+        - name: credentials-registry
+      nodeSelector:
+        magnum.openstack.org/nodegroup: default-worker
